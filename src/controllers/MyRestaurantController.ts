@@ -45,7 +45,6 @@ const updateRestaurant = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User has no restaurant" });
 
     restaurant.restaurantName = req.body.restaurantName;
-    restaurant.zipcode = req.body.zipcode;
     restaurant.city = req.body.city;
     restaurant.deliveryPrice = req.body.deliveryPrice;
     restaurant.estimatedDeliveryTime = req.body.estimatedDeliveryTime;
