@@ -24,20 +24,23 @@ export const jwtParse = async (
   next: NextFunction
 ) => {
   const { authorization } = req.headers;
-  if (!authorization || !authorization.startsWith("Bearer"))
-    return res.sendStatus(401).json({ message: "Token not found" });
+  if (!authorization || !authorization.startsWith("Bearer")) {
+    return res.status(401).json({ message: "Token not found" });
+  }
 
   const [, token] = authorization.split(" ");
   try {
     const decodedToken = jwt.decode(token) as jwt.JwtPayload;
     const auth0Id = decodedToken.sub;
     const user = await User.findOne({ auth0Id });
-    if (!user) return res.sendStatus(401).json({ message: "User not found" });
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
     req.auth0Id = auth0Id as string;
     req.userId = user._id.toString();
     next();
   } catch (e) {
     console.log(e);
-    res.sendStatus(401).json({ message: "Token not valid" });
+    return res.status(401).json({ message: "Token not valid" });
   }
 };

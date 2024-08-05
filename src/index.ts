@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import myUserRoute from "./routes/MyUserRoute";
 import myRestaurantRoute from "./routes/MyRestaurantRoute";
 import restaurantRoute from "./routes/RestaurantRoute";
+import orderRoute from "./routes/OrderRoute";
 import { v2 as cloudinary } from "cloudinary";
 
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING!).then(() => {
@@ -17,16 +18,18 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 const app = express();
-app.use(express.json());
 app.use(cors());
 
+app.use("/api/order/checkout/webhook", express.raw({ type: "*/*" }));
 app.get("/health", async (req: Request, res: Response) => {
   res.send({ message: "health check passed!" });
 });
 
+app.use(express.json());
 app.use("/api/user/me", myUserRoute);
 app.use("/api/my-restaurant", myRestaurantRoute);
 app.use("/api/restaurants", restaurantRoute);
+app.use("/api/order", orderRoute);
 
 app.listen(7000, () => {
   console.log(`Server started on port 7000`);
