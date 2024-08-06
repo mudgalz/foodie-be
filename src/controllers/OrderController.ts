@@ -22,6 +22,22 @@ type CheckoutSessionRequest = {
   restaurantId: string;
 };
 
+const getMyOrders = async (req: Request, res: Response) => {
+  try {
+    const orders = await Order.find({
+      user: req.userId,
+      status: { $ne: "placed" },
+    })
+      .populate("restaurant") // This will load the restaurant document that is referenced in the order document, and include it in the returned order document
+      .populate("user"); // This will load the user document that is referenced in the order document, and include it in the returned order document
+
+    res.status(200).json(orders);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const stripeWebhookHandler = async (req: Request, res: Response) => {
   let event;
   try {
@@ -141,4 +157,4 @@ const createSession = async (
   return session;
 };
 
-export default { createCheckoutSeesion, stripeWebhookHandler };
+export default { createCheckoutSeesion, stripeWebhookHandler, getMyOrders };
