@@ -24,14 +24,31 @@ type CheckoutSessionRequest = {
 
 const getMyOrders = async (req: Request, res: Response) => {
   try {
+    const page = Number(req.query.page) || 1;
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
     const orders = await Order.find({
       user: req.userId,
       status: { $ne: "placed" },
     })
       .populate("restaurant") // This will load the restaurant document that is referenced in the order document, and include it in the returned order document
-      .populate("user"); // This will load the user document that is referenced in the order document, and include it in the returned order document
+      .populate("user") // This will load the user document that is referenced in the order document, and include it in the returned order document
+      .limit(pageSize)
+      .skip(skip);
 
-    res.status(200).json(orders);
+    const total = await Order.countDocuments({
+      user: req.userId,
+      status: { $ne: "placed" },
+    });
+    const response = {
+      data: orders,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / pageSize),
+      },
+    };
+    res.status(200).json(response);
   } catch (e) {
     console.log(e);
     res.status(500).json({ message: "Internal server error" });
